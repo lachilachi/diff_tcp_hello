@@ -25,37 +25,75 @@
 #include <fastrtps/fastrtps_fwd.h>
 #include <fastrtps/attributes/PublisherAttributes.h>
 #include <fastrtps/publisher/PublisherListener.h>
-
+#include <string>
 
 #include "HelloWorld.h"
 
+#include <vector>
+
 class HelloWorldPublisher {
-public:
-	HelloWorldPublisher();
-	virtual ~HelloWorldPublisher();
-	//!Initialize
-	bool init();
-	//!Publish a sample
-	bool publish(bool waitForListener = true);
-	//!Run for number samples
-	void run(uint32_t number, uint32_t sleep);
-private:
-	HelloWorld m_Hello;
-	eprosima::fastrtps::Participant* mp_participant;
-	eprosima::fastrtps::Publisher* mp_publisher;
-	bool stop;
-	class PubListener:public eprosima::fastrtps::PublisherListener
-	{
-	public:
-		PubListener():n_matched(0),firstConnected(false){};
-		~PubListener(){};
-		void onPublicationMatched(eprosima::fastrtps::Publisher* pub, eprosima::fastrtps::rtps::MatchingInfo& info);
-		int n_matched;
+    class PubListener :public eprosima::fastrtps::PublisherListener
+    {
+    public:
+        PubListener()
+            : n_matched(0)
+            , firstConnected(false)
+        {};
+
+        ~PubListener() {};
+
+        void onPublicationMatched(
+            eprosima::fastrtps::Publisher* pub,
+            eprosima::fastrtps::rtps::MatchingInfo& info);
+
+        int n_matched;
         bool firstConnected;
-	}m_listener;
-	void runThread(uint32_t number, uint32_t sleep);
-	HelloWorldPubSubType m_type;
+    } listener_;
+
+    HelloWorld hello_;
+    eprosima::fastrtps::Participant* participant_;
+    eprosima::fastrtps::Publisher* publisher_;
+    bool stop_;
+    HelloWorldPubSubType type_;
+
+    void runThread(
+        uint32_t number,
+        long sleep_ms);
+    void runThread1(
+        uint32_t number,
+        std::string name);
+
+public:
+    HelloWorldPublisher();
+
+    virtual ~HelloWorldPublisher();
+
+    //!Initialize
+    bool init(
+        const std::string &wan_ip,
+        unsigned short port,
+        bool use_tls,
+        const std::vector<std::string>& whitelist);
+
+    //!Publish a sample
+    bool publish(bool waitForListener = true);
+
+    bool publish1(HelloWorld data);
+
+    //!Run for number samples
+    void run(
+        uint32_t number,
+        long sleep_ms);
+
+
+    void run1(
+        uint32_t number,
+        std::string name);
+
 };
+
+
+
 
 
 

@@ -18,7 +18,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.0)
     cmake_policy(SET CMP0048 NEW)
 endif()
 
-project(HelloWorldExample)
+project("HelloWorldExampleTCP")
 
 # Find requirements
 if(NOT fastcdr_FOUND)
@@ -33,6 +33,19 @@ if(NOT fastrtps_FOUND)
     find_package(fastrtps REQUIRED)
 endif()
 
+
+find_package(OpenCV REQUIRED)
+
+if(OpenCV_FOUND)
+    message(STATUS,"Found opencv")
+endif()
+message(STATUS,"OpenCV_INCLUDE_DIRS " ${OpenCV_INCLUDE_DIRS})
+message(STATUS,"project SOURCE DIR " ${PROJECT_SOURCE_DIR})
+
+# message(STATUS,"SFML_DIR " ${SFML_INCLUDE_DIR})
+
+# include_directories(OpenCV_INCLUDE_DIRS)
+include_directories(${OpenCV_INCLUDE_DIRS})
 #Check C++11
 include(CheckCXXCompilerFlag)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG OR
@@ -43,15 +56,23 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG OR
     endif()
 endif()
 
-message(STATUS "Configuring HelloWorld example...")
+message(STATUS "Configuring HelloWorldTCP example...")
 file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CXX "*.cxx")
 file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CPP "*.cpp")
+#file(GLOB XML_CONFIG_FILES "*.xml")
+#message(STATUS "XML Files: " ${XML_CONFIG_FILES})
+configure_file("HelloWorldSubscriber.xml" "HelloWorldSubscriber.xml" COPYONLY)
+configure_file("HelloWorldPublisher.xml" "HelloWorldPublisher.xml" COPYONLY)
+configure_file("dh2048.pem" "dh2048.pem" COPYONLY)
+configure_file("server.pem" "server.pem" COPYONLY)
+configure_file("ca.pem" "ca.pem" COPYONLY)
 
-add_executable(HelloWorldExample ${HELLOWORLD_EXAMPLE_SOURCES_CXX} ${HELLOWORLD_EXAMPLE_SOURCES_CPP})
-target_compile_definitions(HelloWorldExample PRIVATE
+
+add_executable(HelloWorldExampleTCP ${HELLOWORLD_EXAMPLE_SOURCES_CXX} ${HELLOWORLD_EXAMPLE_SOURCES_CPP} miniaudio.h )
+target_compile_definitions(HelloWorldExampleTCP PRIVATE
     $<$<AND:$<NOT:$<BOOL:${WIN32}>>,$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">>:__DEBUG>
     $<$<BOOL:${INTERNAL_DEBUG}>:__INTERNALDEBUG> # Internal debug activated.
 )
-target_link_libraries(HelloWorldExample fastrtps fastcdr foonathan_memory)
-install(TARGETS HelloWorldExample
-    RUNTIME DESTINATION examples/C++/HelloWorldExample/${BIN_INSTALL_DIR})
+target_link_libraries(HelloWorldExampleTCP fastrtps fastcdr foonathan_memory     pthread   ${OpenCV_LIBS})
+install(TARGETS HelloWorldExampleTCP
+    RUNTIME DESTINATION examples/C++/HelloWorldExampleTCP/${BIN_INSTALL_DIR})
